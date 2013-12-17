@@ -35,16 +35,23 @@ public class HttpURLConnectionWrapper
         this.baseURL = "http://localhost:56473/" + action + ".json";
     }
 
-    public String get(Map<String, String> queryParameter) throws IOException
+    public String get(Map<String, String> queryParameter) throws IOException, StopTestException
     {
         HttpURLConnection conn = configureConnection(queryParameter);
         
         conn.setRequestMethod("GET");
 
-        return readStream(conn.getInputStream());
+        try
+        {
+            return readStream(conn.getInputStream());
+        }
+        catch(ConnectException ex)
+        {
+            throw new StopTestException(Strings.ConnectionFailed() + ": " + baseURL, ex);
+        }
     }
 
-    public String post(String data) throws IOException
+    public String post(String data) throws IOException, StopTestException
     {
         HttpURLConnection conn = configureConnection(null);
         
@@ -52,7 +59,16 @@ public class HttpURLConnectionWrapper
             
         byte[] outputBytes = data.getBytes(charset);
 
-        OutputStream os = conn.getOutputStream();
+        OutputStream os;
+
+        try
+        {
+            os = conn.getOutputStream();
+        }
+        catch (java.net.ConnectException ex)
+        {
+            throw new StopTestException(Strings.ConnectionFailed() + ": " + baseURL, ex);
+        }
 
         try
         {

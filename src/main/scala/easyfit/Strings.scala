@@ -54,4 +54,6 @@ object Strings
   def InvalidFilterClass = "Failed parsing filter class name (e.g. com.example.SomeFilter)"
 
   def QueryInputFilter = "Query table can't have input filters"
+
+  def ConnectionFailed = "Connection failed"
 }

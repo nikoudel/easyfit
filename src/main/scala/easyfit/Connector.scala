@@ -47,7 +47,9 @@ class Connector(httpWrapper: HttpURLConnectionWrapper) extends IConnector
     header: Seq[Header],
     arguments: Map[String, String]): (Seq[Seq[String]]) =
   {
-    val incomingData = httpWrapper.get(mapAsJavaMap(arguments))
+    val javaArgs = if (arguments == null) null else mapAsJavaMap(arguments)
+
+    val incomingData = httpWrapper.get(javaArgs)
 
     val resultMaps = JSONConverter.arrayToMaps(incomingData)
 
