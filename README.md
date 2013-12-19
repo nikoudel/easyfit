@@ -1,2 +1,1 @@
-easyfit
-=======
+![easyfit](https://raw.github.com/nikoudel/easyfit/images/logo.png)
