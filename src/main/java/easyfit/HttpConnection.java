@@ -16,21 +16,27 @@ import java.net.*;
 import java.util.Map;
 import java.util.Map.Entry;
 
-//import org.apache.logging.log4j.LogManager;
-//import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 /**
  * Handles the actual communication with SUT over http connection.
  */
-public class HttpURLConnectionWrapper
+public class HttpConnection
 {
-    //protected final Logger logger = LogManager.getLogger(SUTCaller.class.getName());
+    private static final Logger logger = LogManager.getLogger();
 
     private final String charset = "UTF-8";
     private String baseURL;
 
-    public HttpURLConnectionWrapper(String action)
+    public HttpConnection(String action) throws StopTestException
     {
+        if (action == null || action == "")
+        {
+            throw new StopTestException(Strings.MissingAction());
+        }
+
         // todo: configuration
         this.baseURL = "http://localhost:56473/" + action + ".json";
     }
@@ -43,11 +49,17 @@ public class HttpURLConnectionWrapper
 
         try
         {
-            return readStream(conn.getInputStream());
+            String response = readStream(conn.getInputStream());
+
+            log(conn, response, "");
+
+            return response;
         }
         catch(ConnectException ex)
         {
-            throw new StopTestException(Strings.ConnectionFailed() + ": " + baseURL, ex);
+            log(conn, "", ex);
+
+            throw new StopTestException(Strings.ConnectionFailed() + ": " + conn.getURL(), ex);
         }
     }
 
@@ -56,7 +68,7 @@ public class HttpURLConnectionWrapper
         HttpURLConnection conn = configureConnection(null);
         
         conn.setRequestMethod("POST");
-            
+
         byte[] outputBytes = data.getBytes(charset);
 
         OutputStream os;
@@ -67,19 +79,40 @@ public class HttpURLConnectionWrapper
         }
         catch (java.net.ConnectException ex)
         {
-            throw new StopTestException(Strings.ConnectionFailed() + ": " + baseURL, ex);
+            log(conn, data, ex);
+
+            throw new StopTestException(Strings.ConnectionFailed() + ": " + conn.getURL(), ex);
         }
 
         try
         {
             os.write(outputBytes);
         }
+        catch(Exception ex)
+        {
+            log(conn, data, ex);
+
+            throw new StopTestException(Strings.UnexpectedFailure() + ": " + conn.getURL(), ex);
+        }
         finally
         {
             if (os != null) os.close();
         }
 
-        return readStream(conn.getInputStream());
+        try
+        {
+            String response = readStream(conn.getInputStream());
+
+            log(conn, data, response);
+
+            return response;
+        }
+        catch(Exception ex)
+        {
+            log(conn, data, ex);
+
+            throw new StopTestException(Strings.UnexpectedFailure() + ": " + conn.getURL(), ex);
+        }
     }
 
     private HttpURLConnection configureConnection(Map<String, String> queryMap) throws IOException, UnsupportedEncodingException
@@ -137,8 +170,27 @@ public class HttpURLConnectionWrapper
 
         reader.close();
 
-        //logger.debug("readStream: " + sb.toString();
-
         return sb.toString();
+    }
+
+    private void log(Level level, HttpURLConnection conn, String msg1, String msg2, Throwable ex)
+    {
+        String logMessage = String.format("%s %s", conn.getRequestMethod(), conn.getURL());
+
+        if(msg1 != "") logMessage += ": " + msg1;
+
+        if(msg2 != "") logMessage += " -> " + msg2;
+
+        logger.log(level, logMessage, ex);
+    }
+
+    private void log(HttpURLConnection conn, String msg1, String msg2)
+    {
+        log(Level.DEBUG, conn, msg1, msg2, null);
+    }
+
+    private void log(HttpURLConnection conn, String msg1, Throwable ex)
+    {
+        log(Level.ERROR, conn, msg1, "", ex);
     }
 }

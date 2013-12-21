@@ -11,7 +11,6 @@
 package easyfit.tables
 
 import easyfit.IConnector
-import easyfit.HttpURLConnectionWrapper
 import easyfit.Connector
 import easyfit.StopTestException
 import easyfit.Store
@@ -31,7 +30,7 @@ class Query(action: String, parameterMapId: String, sut: IConnector)
 {
   def this(action: String, parameterMapId: String)
   {
-    this(action, parameterMapId, new Connector(new HttpURLConnectionWrapper(action)))
+    this(action, parameterMapId, new Connector(action))
   }
 
   def this(action: String)

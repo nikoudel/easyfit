@@ -25,18 +25,20 @@ trait IConnector
 
 /**
  * "Connects" Row and Query tables to SUT by converting cell
- * sequences to JSON and calling HttpURLConnectionWrapper.
- * @param httpWrapper instance of HttpURLConnectionWrapper
+ * sequences to JSON and calling HttpConnection.
+ * @param sutAction name of SUT method to call
  */
-class Connector(httpWrapper: HttpURLConnectionWrapper) extends IConnector
+class Connector(sutAction: String) extends IConnector
 {
+  val httpConnection = new HttpConnection(sutAction)
+
   def executeRow(
     headers: Seq[Header],
     row: Seq[RowCell]): Seq[String] =
   {
     val outgoingData = JSONConverter.rowToJSON(headers, row)
 
-    val incomingData = httpWrapper.post(outgoingData)
+    val incomingData = httpConnection.post(outgoingData)
 
     val resultMap = JSONConverter.objectToMap(incomingData)
 
@@ -49,7 +51,7 @@ class Connector(httpWrapper: HttpURLConnectionWrapper) extends IConnector
   {
     val javaArgs = if (arguments == null) null else mapAsJavaMap(arguments)
 
-    val incomingData = httpWrapper.get(javaArgs)
+    val incomingData = httpConnection.get(javaArgs)
 
     val resultMaps = JSONConverter.arrayToMaps(incomingData)
 

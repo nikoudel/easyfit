@@ -56,4 +56,6 @@ object Strings
   def QueryInputFilter = "Query table can't have input filters"
 
   def ConnectionFailed = "Connection failed"
+
+  def UnexpectedFailure = "Unexpected failure"
 }

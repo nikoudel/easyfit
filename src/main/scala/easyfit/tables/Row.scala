@@ -21,7 +21,7 @@ class Row(action: String, sut: IConnector)
 {
   def this(action: String)
   {
-    this(action, new Connector(new HttpURLConnectionWrapper(action)))
+    this(action, new Connector(action))
   }
 
   if (action == null || action.isEmpty)
