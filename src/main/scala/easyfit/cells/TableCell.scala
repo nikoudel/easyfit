@@ -125,7 +125,18 @@ abstract class TableCell(
 
   private def formatNoVariable(actual: String, failAction: String): String =
   {
-    if (expected == actual)
+    if(expected == "")
+    {
+      if(actual == "")
+      {
+        "ignore"
+      }
+      else
+      {
+        String.format("ignore: %s", actual)
+      }
+    }
+    else if (expected == actual)
     {
       String.format("pass: %s", actual)
     }
