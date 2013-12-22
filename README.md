@@ -7,7 +7,7 @@ Easyfit is a [FitNesse](http://fitnesse.org) plugin. Its main goal is to lower t
 3. make these tables flexible enough to get the job done in a convenient way
 4. use a standard communication protocol between FitNesse and SUT
 
-Easyfit takes advantage of RESTful frameworks in several ways. First, it utilizes http(s) protocol for SUT communication making it suitable for testing any kind of applications built on platforms with decent REST support (eg. [ServiceStack](https://servicestack.net) for .NET and [Restlet](http://restlet.org) for Java). Second, the frameworks reduce maintenance effort by handling the boring and error-prone task of test data (de)serialization and routing (the boilerplate code mentioned above). Finally, although Easyfit doesn't force the user to apply the classical [RESTful approach](http://en.wikipedia.org/wiki/Representational_state_transfer), it makes it easy to adopt one, possibly leading to a cleaner application API and overall architecture, especially with [TDD](http://en.wikipedia.org/wiki/Test-driven_development) process.
+Easyfit takes advantage of RESTful frameworks in several ways. First, it utilizes http(s) protocol for SUT communication making it suitable for testing any kind of applications built on platforms with decent REST support (eg. [ServiceStack][ss] for .NET and [Restlet](http://restlet.org) for Java). Second, the frameworks reduce maintenance effort by handling the boring and error-prone task of test data (de)serialization and routing (the boilerplate code mentioned above). Finally, although Easyfit doesn't force the user to apply the classical [RESTful approach](http://en.wikipedia.org/wiki/Representational_state_transfer), it makes it easy to adopt one, possibly leading to a cleaner application API and overall architecture, especially with [TDD](http://en.wikipedia.org/wiki/Test-driven_development) process.
 
 Easyfit has only two tables handling all SUT communication (Query and Row). These two tables incapsulate the [CRUD](http://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations enabling interactions with systems of any complexity.
 
@@ -54,9 +54,9 @@ The classpath definitions add easyfit dependencies:
 
 <dl>
 	<dt>.\lib</dt>
-	<dd>adds the lib directory to the classpath (needed to access the logging configuration file log4j2.xml)</dd>
+	<dd>adds the lib directory to the classpath (needed for accessing the logging configuration file log4j2.xml)</dd>
 	<dt>.\lib\scala-library.jar</dt>
-	<dd>adds the [Scala](http://www.scala-lang.org/) library (easyfit is written in Scala)</dd>
+	<dd>adds the <a href="http://www.scala-lang.org">Scala</a> library (easyfit is written in Scala)</dd>
 	<dt>.\lib\easyfit_2.10-0.1.jar</dt>
 	<dd>adds the easyfit library itself</dd>
 	<dt>.\lib\log4j-api-2.0-beta9.jar</dt>
@@ -77,6 +77,80 @@ First, the [easyfit.tables](https://github.com/nikoudel/easyfit/tree/master/src/
 
 Next, filter "tf" is defined. Filters help to overcome possible JSON serialization issues. Filters will be explained later on this page.
 
-Finally, the SUT call: SuiteSetUp includes three Row tables.
+Finally, the SUT call: SuiteSetUp includes three Row tables (CreateOtherDevices is similar to the other two and is collapsed to save screen space).
+
+Row table
+---------
+
+Every table has a name (Row in this case). Row and Query tables have SUT action (CreateRoom) and a header row. Row table has at least one row. In this case it has three rows, so the SUT will be called three times.
+
+![](https://raw.github.com/nikoudel/easyfit/images/RowTable.png "Row table")
+
+Table name tells FitNesse which table to create. Easyfit Row table is in [Row.scala](https://github.com/nikoudel/easyfit/blob/master/src/main/scala/easyfit/tables/Row.scala) file.
+
+SUT action tells the table which operation to call on the SUT side. The following code sample demonstrates easyfit's entry point into the SUT which is implemented using the [ServiceStack][ss] communication framework (an alternative to Microsoft WCF).
+
+CreateRoom action leads to CreateRoomService.Post method in [CreateRoomService.cs](https://github.com/nikoudel/SmartHome/blob/master/SmartHomeTests/Services/CreateRoomService.cs):
+
+```csharp
+/// <summary>
+/// An http POST to /CreateRoom URL will be serialized as RoomData and passed to
+/// CreateRoomService.Post method which returns a RoomData object to be serialized
+/// and sent back to the caller over http.
+/// </summary>
+[Route("/CreateRoom", "POST")]
+public class RoomData
+{
+    public long Id { get; set; }
+    public RoomType RoomType { get; set; }
+}
+
+public class CreateRoomService : Service
+{
+    //Injected by IOC (see ApplictionHost.Configure)
+    public Repository<Room> Repository { get; set; }
+
+    /// <summary>
+    /// Create and add a new Room into the repository.
+    /// </summary>
+    public RoomData Post(RoomData data)
+    {
+        // Note: repository creates a Room, not RoomData.
+        var room = Repository.Store(Room.createInstance(data.RoomType));
+
+        // set room ID back to the data object
+        data.Id = room.Id;
+
+        return data;
+    }
+}
+```
+
+The CreateRoomService.Post method expects a RoomData item as an input parameter. The fields of RoomData (Id and RoomType) are provided in the header row of the Row table. It also returns a RoomData back to FitNessse.
+
+**Note:** SmartHome\FitNesse\lib directory has a log4j2.xml file in it. By default, the file configures log4j to print all the data passing between easyfit and the SUT into the SmartHome\FitNesse\easyfit.log log file. In case of the Row table mentioned above, the data would look like this:
+
+    ... POST http://localhost:56473/CreateRoom.json: {"Id":null,"RoomType":"Kitchen"} -> {"Id":1,"RoomType":"Kitchen"}
+    ... POST http://localhost:56473/CreateRoom.json: {"Id":null,"RoomType":"Sauna"} -> {"Id":2,"RoomType":"Sauna"}
+    ... POST http://localhost:56473/CreateRoom.json: {"Id":null,"RoomType":"LivingRoom"} -> {"Id":3,"RoomType":"LivingRoom"}
+
+The log shows that there were three POST calls to http://localhost:56473/CreateRoom.json with incoming data on the left side of the arrow and response on the right.
+
+The Id field is null when entering the SUT because the Row table is about to initialize variables $kitchen, $sauna and $livingRoom with values coming from the SUT (1, 2 and 3). This mechanism is similar to FitNesse [symbols](http://localhost:8080/FitNesse.UserGuide.SliM.SymbolsInTables) but it's fully re-implemented in easyfit allowing, for example, variable initialization inside the Query table.
+
+After having executed the suite set-up it looks like this:
+
+![](https://raw.github.com/nikoudel/easyfit/images/SuiteSetupExecuted.PNG "SuiteSetUp executed")
+
+The left-side arrow indicates variable initialization and eg. $kitchen [1] means a variable with value 1 has been used. The data of CreateDevice row table follows:
+
+    ... POST http://localhost:56473/CreateDevice.json: {"Id":null,"RoomId":"1","DeviceType":"CeilingLight"} -> {"Id":1,"RoomId":1,"DeviceType":"CeilingLight","DeviceState":"Undefined"}
+    ... POST http://localhost:56473/CreateDevice.json: {"Id":null,"RoomId":"1","DeviceType":"LedSpotLight"} -> {"Id":2,"RoomId":1,"DeviceType":"LedSpotLight","DeviceState":"Undefined"}
+    ... POST http://localhost:56473/CreateDevice.json: {"Id":null,"RoomId":"1","DeviceType":"LedSpotLight"} -> {"Id":3,"RoomId":1,"DeviceType":"LedSpotLight","DeviceState":"Undefined"}
+    ... POST http://localhost:56473/CreateDevice.json: {"Id":null,"RoomId":"1","DeviceType":"LedSpotLight"} -> {"Id":4,"RoomId":1,"DeviceType":"LedSpotLight","DeviceState":"Undefined"}
+    ... POST http://localhost:56473/CreateDevice.json: {"Id":null,"RoomId":"2","DeviceType":"SteamLight"} -> {"Id":5,"RoomId":2,"DeviceType":"SteamLight","DeviceState":"Undefined"}
+    ... POST http://localhost:56473/CreateDevice.json: {"Id":null,"RoomId":"3","DeviceType":"CeilingLight"} -> {"Id":6,"RoomId":3,"DeviceType":"CeilingLight","DeviceState":"Undefined"}
+    ... POST http://localhost:56473/CreateDevice.json: {"Id":null,"RoomId":"3","DeviceType":"TableLight"} -> {"Id":7,"RoomId":3,"DeviceType":"TableLight","DeviceState":"Undefined"}
 
 [lights]: http://localhost:8080/SmartHome.TurnKitchenLightsOnOff
+[ss]: https://servicestack.net
