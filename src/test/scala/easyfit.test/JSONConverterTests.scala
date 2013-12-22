@@ -33,7 +33,7 @@ class JSONConverterTests extends EasyTest
 
       val str = JSONConverter.rowToJSON(header, row)
 
-      str should be( """{"C1":"r1c1","C2":"r1c2","C3":""}""")
+      str should be( """{"C1":"r1c1","C2":"r1c2","C3":null}""")
     }
 
   it should "convert incoming row JSON into a map" in

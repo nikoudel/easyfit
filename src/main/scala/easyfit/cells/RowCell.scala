@@ -21,7 +21,7 @@ class RowCell(
   {
     if (emptySutInput)
     {
-      ""
+      null
     }
     else
     {

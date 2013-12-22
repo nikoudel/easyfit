@@ -42,9 +42,9 @@ class ReadOnlyColumns extends EasyTest
   private def ensureFirstColumnIsEmpty(header: Seq[Header], row: Seq[RowCell])
   {
     header(0).Value should be("C1?")
-    row(0).getSutInput(true) should be("")
+    row(0).getSutInput(true) should be(null)
 
     header(1).Value should be("C2")
-    row(1).getSutInput(false) should not be ("")
+    row(1).getSutInput(false).length should be (4)
   }
 }
