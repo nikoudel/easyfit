@@ -70,7 +70,7 @@ In this case [http://localhost:8080/SmartHome.SuiteSetUp](http://localhost:8080/
 
 ![](https://raw.github.com/nikoudel/easyfit/images/SuiteSetup.PNG ".SmartHome.SuiteSetUp")
 
-First, the [easyfit.tables](https://github.com/nikoudel/easyfit/tree/master/src/main/scala/easyfit/tables) namespace is [imported](http://fitnesse.org/FitNesse.UserGuide.SliM.ImportTable). Now the tables can be access with a shorter name (Table:Row instead of Table:easyfit.tables.Row).
+First, the [easyfit.tables](https://github.com/nikoudel/easyfit/tree/master/src/main/scala/easyfit/tables) namespace is [imported](http://fitnesse.org/FitNesse.UserGuide.SliM.ImportTable). Now the tables can be accessed with a shorter name (Table:Row instead of Table:easyfit.tables.Row).
 
 Next, filter "tf" is defined. Filters help to overcome possible JSON serialization issues. Filters will be explained later on this page.
 
@@ -123,7 +123,7 @@ public class CreateRoomService : Service
 }
 ```
 
-The CreateRoomService.Post method expects a RoomData item as an input parameter. The fields of RoomData (Id and RoomType) are provided in the header row of the Row table. It also returns a RoomData back to FitNessse.
+The CreateRoomService.Post method expects a RoomData item as an input parameter. The fields of RoomData (Id and RoomType) are provided in the header row of the Row table. It also returns a RoomData back to FitNesse.
 
 **Note:** SmartHome\FitNesse\lib directory has a log4j2.xml file in it. By default, the file configures log4j to print all the data passing between easyfit and the SUT into the SmartHome\FitNesse\easyfit.log log file. In case of the Row table mentioned above, the data would look like this:
 
@@ -247,11 +247,11 @@ The ending part of [TurnKitchenLightsOnOff](http://localhost:8080/SmartHome.Turn
 Other features
 --------------
 
-So far easyfit tables were used only modify or inspect persistent SUT state (ie. whether an item exists or not). The second test, [http://localhost:8080/SmartHome.SaunaSchedule](http://localhost:8080/SmartHome.SaunaSchedule), tests logical state. First (step 1), it configures a sauna to turn on and off at certain time of the day, two days a week:
+So far easyfit tables were used only to modify or inspect persistent SUT state (ie. whether an item exists or not). The second test, [http://localhost:8080/SmartHome.SaunaSchedule](http://localhost:8080/SmartHome.SaunaSchedule), tests logical state. First (step 1), it configures a sauna to turn on and off at certain time of the day, two days a week:
 
 ![](https://raw.github.com/nikoudel/easyfit/images/SaunaTest.PNG "SaunaSchedule test")
 
-Next (step 2), GetSaunaState Row table tests if sauna corresponded the expected values at different points in time. This example has a couple of new features: some column names end with "?" sign, the DateTime column includes the "tf" filter and some cells have an empty value in them. To describe these features, let's look at the raw data once again:
+Next (step 2), GetSaunaState Row table tests if the state matched the expected values at different points in time. This example has a couple of new features: some column names end with "?" sign, the DateTime column includes the "tf" filter and some cells have an empty value in them. To describe these features, let's look at the raw data once again:
 
     ... POST http://localhost:56473/GetSaunaState.json: {"Sauna":"2","DateTime":"2013-09-24 18:29","Stove":null,"Light":null,"Temperature":null} -> {"Sauna":2,"DateTime":"\/Date(1380036540000+0300)\/","Stove":"Off","Light":"Off","Temperature":22}
     ... POST http://localhost:56473/GetSaunaState.json: {"Sauna":"2","DateTime":"2013-09-24 18:30","Stove":null,"Light":null,"Temperature":null} -> {"Sauna":2,"DateTime":"\/Date(1380036600000+0300)\/","Stove":"On","Light":"Off","Temperature":22}
@@ -264,17 +264,19 @@ Next (step 2), GetSaunaState Row table tests if sauna corresponded the expected 
 
 ### One-way data flow with "?" sign
 
-The "?" sign defines a column with one-way data flow, ie. although a cell has some non-empty value (eg. Temperature = 22), the data log shows that there is no value being passed from FitNesse to SUT ("Temperature":null). It only comes back from SUT ("Temperature":22). Although in this particular case (and in vast majority of all cases in general) it's irrelevant whether there is a value going into SUT or not (see [GetSaunaStateService.cs](https://github.com/nikoudel/SmartHome/blob/master/SmartHomeTests/Services/GetSaunaStateService.cs), sometimes values coming into SUT are expected to be null. "?" sign provides such a possibility.
+The "?" sign defines a column with one-way data flow, ie. although a cell has some non-empty value (eg. Temperature = 22), the data log shows that there is no value being passed from FitNesse to SUT ("Temperature":null). It only comes back from SUT ("Temperature":22). Although in this particular case (and in vast majority of all cases in general) it's irrelevant whether there is a value going into SUT or not (see [GetSaunaStateService.cs](https://github.com/nikoudel/SmartHome/blob/master/SmartHomeTests/Services/GetSaunaStateService.cs)), sometimes values coming into SUT are expected to be null. "?" sign provides such a possibility.
 
 ### Filters
 
-The "tf" filter defined earlier in the [SuiteSetUp](http://localhost:8080/SmartHome.SuiteSetUp) takes care of the date serialization problem which can be noticed from the data log. ServiceStack serializes dates in the "milliseconds since epoch" format, eg. "/Date(1380304800000+0300)/". FitNesse test, however, expects the date to be in a custom, human readable format, eg. "2013-09-27 19:20". Easyfit handles the problem by supporting custom "filters" which can modify data values coming into a SUT (**ExpectedFilter**) and coming bach into FitNesse (**ActualFilter**). See [Filter.scala](https://github.com/nikoudel/easyfit/blob/master/src/main/scala/easyfit/tables/Filter.scala) for implementation details.
+The "tf" filter defined earlier in the [SuiteSetUp](http://localhost:8080/SmartHome.SuiteSetUp) takes care of the date serialization problem which can be noticed from the data log. ServiceStack serializes dates in the "milliseconds since epoch" format, eg. "/Date(1380304800000+0300)/". FitNesse test, however, expects the date to be in a custom format, eg. "2013-09-27 19:20". The actual data coming from the SUT needs to be converted into a human readable form before being matched to the expected values.
+
+Easyfit handles the problem by supporting custom "filters" which can modify data values leaving FitNesse ("expected" values) and coming back in ("actual" values). Expected and actual values are processed by filters defined in **ExpectedFilter** and **ActualFilter** tables, respectively. See [Filter.scala](https://github.com/nikoudel/easyfit/blob/master/src/main/scala/easyfit/tables/Filter.scala) for implementation details.
 
 In this case the data requiring modification originates from SUT, so an ActualFilter needs to be defined:
 
 ![](https://raw.github.com/nikoudel/easyfit/images/ActualFilter.PNG "filter definition")
 
-Filter definition tables have no header row, just two columns: filter alias to be used in tests on the left (eg. "tf") and full name of the class implementing the filter (eg. "filters.TimeFormatter"). Easyfit loads the class with reflection as long as it can be found from the classpath (the .\lib\filters_2.10-1.0.jar definition on the [root page](http://localhost:8080/SmartHome)).
+Filter definition tables have no header row, just two columns: filter alias to be used in tests on the left side of the column name (eg. "tf" in "tf:DateTime") and full name of the class implementing the filter (eg. "filters.TimeFormatter"). Easyfit loads the class with Java reflection as long as it can be found from the classpath. The .\lib\filters_2.10-1.0.jar definition on the [root page](http://localhost:8080/SmartHome) adds the library containing the filter class (filters.TimeFormatter) to the classpath.
 
 A sample filter project is available [here] (https://github.com/nikoudel/filters). A filter method needs to implement the [IFilter](https://github.com/nikoudel/easyfit/blob/master/src/main/java/easyfit/IFilter.java) interface defined in easyfit:
 
