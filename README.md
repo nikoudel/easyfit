@@ -72,7 +72,9 @@ In this case [http://localhost:8080/SmartHome.SuiteSetUp](http://localhost:8080/
 
 First, the [easyfit.tables](https://github.com/nikoudel/easyfit/tree/master/src/main/scala/easyfit/tables) namespace is [imported](http://fitnesse.org/FitNesse.UserGuide.SliM.ImportTable). Now the tables can be accessed with a shorter name (Table:Row instead of Table:easyfit.tables.Row).
 
-Next, filter "tf" is defined. Filters help to overcome possible JSON serialization issues. Filters will be explained later on this page.
+Second, a URL of System Under Test is configured. With this configuration SUT is expected to listen on http port 56473 and have a suffix ".json". The "(controller)" part will be replaced with a table action, eg. http://localhost:56473/CreateRoom.json.
+
+Third, filter "tf" is defined. Filters help to overcome possible JSON serialization issues. Filters will be explained later on this page.
 
 Finally, the SUT call: SuiteSetUp includes three Row tables (CreateOtherDevices is similar to the other two and is collapsed to save screen space).
 
