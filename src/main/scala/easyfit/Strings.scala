@@ -19,6 +19,8 @@ object Strings
 
   def MissingAction = "Table action should not be empty."
 
+  def MissingBaseURL = "Base URL should not be empty."
+
   def RowTableMissingRows = "Row table should have a header and at least one row."
 
   def MissingColumns = "Header should have at least one column."
@@ -37,7 +39,7 @@ object Strings
 
   def MapTableInvalidColumns = "Map table should always have two columns."
 
-  def MapTableEmptyKey = "Empty key in a map table is not allowed."
+  def MapTableEmptyKey = "Empty key in a Map table is not allowed."
 
   def UndefinedMap = "Undefined map"
 
@@ -58,4 +60,12 @@ object Strings
   def ConnectionFailed = "Connection failed"
 
   def UnexpectedFailure = "Unexpected failure"
+
+  def ConfigurationTableMissingRows = "Configuration table should have at least one row."
+
+  def ConfigurationTableInvalidColumns = "Configuration table should always have two columns."
+
+  def ConfigurationTableEmptyKey = "Empty key in a Configuration table is not allowed."
+
+  def InvalidBaseURL = "Invalid base URL; expected pattern: http://localhost:56473/(controller).json"
 }

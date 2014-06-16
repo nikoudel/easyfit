@@ -24,6 +24,7 @@ object Store
   private val Variables = new mutable.HashMap[String, String] with mutable.SynchronizedMap[String, String]
   private val Filters = new mutable.HashMap[String, StoredFilter] with mutable.SynchronizedMap[String, StoredFilter]
   private val Maps = new mutable.HashMap[String, Map[String, String]] with mutable.SynchronizedMap[String, Map[String, String]]
+  private val Conf = new mutable.HashMap[String, String] with mutable.SynchronizedMap[String, String]
 
   def getVariable(key: String): String =
   {
@@ -33,6 +34,16 @@ object Store
   def setVariable(key: String, value: String)
   {
     setItem(key, value, Variables)
+  }
+
+  def getConfig(key: String): String =
+  {
+    getItem(key, Conf)
+  }
+
+  def setConfig(key: String, value: String)
+  {
+    setItem(key, value, Conf)
   }
 
   def getMap(key: String): Map[String, String] =

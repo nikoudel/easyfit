@@ -1,6 +1,6 @@
 name := "easyfit"
 
-version := "0.1"
+version := "0.2"
 
 resolvers += "Sonatype OSS Public" at "https://oss.sonatype.org/content/groups/public/"
 

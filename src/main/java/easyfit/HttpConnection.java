@@ -30,15 +30,14 @@ public class HttpConnection
     private final String charset = "UTF-8";
     private String baseURL;
 
-    public HttpConnection(String action) throws StopTestException
+    public HttpConnection(String baseURL) throws StopTestException
     {
-        if (action == null || action == "")
+        if (baseURL == null || baseURL == "")
         {
-            throw new StopTestException(Strings.MissingAction());
+            throw new StopTestException(Strings.MissingBaseURL());
         }
 
-        // todo: configuration
-        this.baseURL = "http://localhost:56473/" + action + ".json";
+        this.baseURL = baseURL;
     }
 
     public String get(Map<String, String> queryParameter) throws IOException, StopTestException

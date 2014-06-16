@@ -38,7 +38,7 @@ class Map(mapId: String)
     {
       val row = it.next
 
-      validateMapRowStructure(row)
+      validateMapColumnStructure(row)
 
       map += getPair(row.get(0), row.get(1), result)
     }
@@ -61,7 +61,7 @@ class Map(mapId: String)
     }
   }
 
-  private def validateMapRowStructure(row: java.util.List[String]) =
+  private def validateMapColumnStructure(row: java.util.List[String]) =
   {
     if (row.size != 2)
     {

@@ -12,6 +12,7 @@ package easyfit
 
 import scala.collection.JavaConversions.mapAsJavaMap
 import easyfit.cells.{RowCell, Header}
+import easyfit.Strings.InvalidBaseURL
 
 /**
  * Enables stubbing for unit testing.
@@ -30,7 +31,8 @@ trait IConnector
  */
 class Connector(sutAction: String) extends IConnector
 {
-  val httpConnection = new HttpConnection(sutAction)
+  val baseURL = getBaseURL()
+  val httpConnection = new HttpConnection(baseURL)
 
   def executeRow(
     headers: Seq[Header],
@@ -43,6 +45,31 @@ class Connector(sutAction: String) extends IConnector
     val resultMap = JSONConverter.objectToMap(incomingData)
 
     compileResults(headers, resultMap)
+  }
+
+  def getBaseURL(): String =
+  {
+    val template = Store.getConfig("baseURL")
+
+    if (template == null || template == "")
+    {
+      return "http://localhost:56473/api/" + sutAction
+    }
+
+    parseTemplate(template)
+  }
+
+  def parseTemplate(template: String): String =
+  {
+    val ctrl = "(controller)"
+    val n = template.indexOf(ctrl)
+
+    if (n > 0)
+    {
+      return template.substring(0, n) + sutAction + template.substring(n + ctrl.length())
+    }
+
+    throw new StopTestException(InvalidBaseURL)
   }
 
   def executeQuery(
