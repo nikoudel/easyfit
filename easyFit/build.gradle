@@ -1,0 +1,29 @@
+apply plugin: 'java'
+apply plugin: 'scala'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.11.+'
+    compile 'com.eclipsesource.minimal-json:minimal-json:0.9.+'
+    testCompile 'org.scalatest:scalatest_2.11:2+'
+    testCompile 'junit:junit:4.+'
+}
+
+jar {
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+task install(type: Copy, dependsOn: build) {
+   from 'build/libs'
+   into 'install'
+}
+
+sourceSets.main.scala.srcDir "src/main/java"
+sourceSets.main.java.srcDirs = []
