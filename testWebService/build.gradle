@@ -4,11 +4,15 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+  compile "io.dropwizard:dropwizard-core:0.9.+"
+}
+
 jar {
     manifest {
         attributes 'Main-Class': 'TestWebService'
     }
-    
+
     from {
         configurations.compile.collect {
             it.isDirectory() ? it : zipTree(it)
