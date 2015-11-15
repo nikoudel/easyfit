@@ -1,8 +1,9 @@
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.dropwizard.Configuration;
 
-public class TestWebService extends Application<HelloWorldConfiguration>
+public class TestWebService extends Application<Configuration>
 {
     public static void main(String[] args) throws Exception
     {
@@ -12,26 +13,21 @@ public class TestWebService extends Application<HelloWorldConfiguration>
     @Override
     public String getName()
     {
-        return "hello-world";
+        return "easyFit-system-under-test";
     }
 
     @Override
-    public void initialize(Bootstrap<HelloWorldConfiguration> bootstrap)
+    public void initialize(Bootstrap<Configuration> bootstrap)
     {
         // nothing to do yet
     }
 
     @Override
-    public void run(HelloWorldConfiguration configuration, Environment environment)
+    public void run(Configuration configuration, Environment environment)
     {
-        final HelloWorldResource resource = new HelloWorldResource(
-            configuration.getTemplate(),
-            configuration.getDefaultName()
-        );
+        environment.healthChecks().register("emptyCheckToHideWarning", new EmptyHealthCheck());
 
-        final TemplateHealthCheck healthCheck = new TemplateHealthCheck(configuration.getTemplate());
-
-        environment.healthChecks().register("template", healthCheck);
-        environment.jersey().register(resource);
+        environment.jersey().register(new GetCarsResource());
+        environment.jersey().register(new CreateCarResource());
     }
 }
