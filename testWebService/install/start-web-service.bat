@@ -1,3 +1,3 @@
 @echo off
 
-java -jar testWebService.jar server configuration.yml
+start java -jar testWebService.jar server configuration.yml
