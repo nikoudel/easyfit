@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
-@Path("/Cars.json")
+@Path("/GetCars.json")
 @Produces(MediaType.APPLICATION_JSON)
 public class GetCarsResource
 {

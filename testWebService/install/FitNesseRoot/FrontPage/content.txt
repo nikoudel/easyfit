@@ -1,0 +1,37 @@
+!define TEST_SYSTEM {slim}
+
+!path ..\..\easyFit\install\easyFit.jar
+!path ..\..\filters\install\filters.jar
+
+!|Import       |
+|easyfit.tables|
+
+!|Table:Configuration                                |
+|baseURL    |http://localhost:48080/(controller).json|
+|logFilePath|.\easyFit.log                           |
+
+!|Table:ActualFilter    |
+|df|filter.DateFormatter|
+
+!|Table:Row|CreateCar                                              |
+|id?       |make  |model  |color|df:registrationDate|mileage|fuel  |
+|          |VW    |Passat |red  |2010-11-25         |117000 |Diesel|
+|          |VW    |Bora   |red  |2004-04-02         |176000 |Petrol|
+|          |VW    |Jetta  |blue |2007-07-22         |123400 |Petrol|
+|          |Toyota|Corolla|green|2012-01-11         |64200  |Petrol|
+
+!|Table:Query|GetCars                                 |
+|id          |make  |model  |color|df:registrationDate|
+|            |VW    |Passat |red  |2010-11-25         |
+|            |VW    |Bora   |red  |2004-04-02         |
+|            |VW    |Jetta  |blue |2007-07-22         |
+|            |Toyota|Corolla|green|2012-01-11         |
+
+!|Table:Map|$query|
+|make      |VW    |
+|color     |red   |
+
+!|Table:Query|GetCars|$query                          |
+|id          |make   |model |color|df:registrationDate|
+|            |VW     |Passat|red  |2010-11-25         |
+|            |VW     |Bora  |red  |2004-04-02         |

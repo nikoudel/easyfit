@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':easyFit')
+}
+
+task install(type: Copy, dependsOn: build) {
+   from 'build/libs'
+   into 'install'
+}
