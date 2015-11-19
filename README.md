@@ -1,8 +1,8 @@
-![easyfit](https://raw.github.com/nikoudel/easyfit/images/logo.png)
+![easyfit](https://raw.githubusercontent.com/nikoudel/easyfit/images/logo.png)
 
 Easyfit is a connector between [FitNesse](http://fitnesse.org) and a System Under Test (SUT). It transforms tabular data from FitNesse tables into HTTP calls to SUT:
 
-![](https://raw.githubusercontent.com/nikoudel/easyfit/images/cars.png FitNesse tables)
+![FitNesse tables](https://raw.githubusercontent.com/nikoudel/easyfit/images/cars.png)
 
 	POST http://localhost:48080/CreateCar.json: {"id":null,"make":"VW","model":"Passat","color":"red","registrationDate":"2010-11-25","mileage":"117000","fuel":"Diesel"} -> {"id":1,"make":"VW","model":"Passat","color":"red","registrationDate":1290643200000,"mileage":117000,"fuel":"Diesel"}
 	POST http://localhost:48080/CreateCar.json: {"id":null,"make":"VW","model":"Bora","color":"red","registrationDate":"2004-04-02","mileage":"176000","fuel":"Petrol"} -> {"id":2,"make":"VW","model":"Bora","color":"red","registrationDate":1080864000000,"mileage":176000,"fuel":"Petrol"}
