@@ -62,4 +62,21 @@ class JSONConverterTests extends EasyTest
       table(1)("Id") should be("2")
       table(1)("DeviceType") should be("CeilingLight")
     }
+
+  it should "return an empty map or table from empty data" in
+    {
+      val mapFromEmpty = JSONConverter.objectToMap("")
+      val mapFromNull = JSONConverter.objectToMap(null)
+      val mapFromNullString = JSONConverter.objectToMap("null")
+      val tableFromEmpty = JSONConverter.arrayToMaps("")
+      val tableFromNull = JSONConverter.arrayToMaps(null)
+      val tableFromNullString = JSONConverter.arrayToMaps("null")
+
+      mapFromEmpty.size should be(0)
+      mapFromNull.size should be(0)
+      mapFromNullString.size should be(0)
+      tableFromEmpty.size should be(0)
+      tableFromNull.size should be(0)
+      tableFromNullString.size should be(0)
+    }
 }

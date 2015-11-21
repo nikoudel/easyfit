@@ -37,13 +37,17 @@ object JSONConverter
     jsonObject.toString
   }
 
-  def objectToMap(data: String): Map[String, String] =
+  def objectToMap(raw: String): Map[String, String] =
   {
+    val data = if (raw == null || raw.isEmpty || raw == "null") "{}" else raw
+
     jsonObjectToMap(Json.parse(data).asObject())
   }
 
-  def arrayToMaps(data: String): Seq[Map[String, String]] =
+  def arrayToMaps(raw: String): Seq[Map[String, String]] =
   {
+    val data = if (raw == null || raw.isEmpty || raw == "null") "[]" else raw
+
     val items = Json.parse(data).asArray()
     val maps = new Array[Map[String, String]](items.size)
     val it = items.iterator
