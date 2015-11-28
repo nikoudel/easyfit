@@ -13,39 +13,12 @@ package easyfit.tables
 import easyfit.Strings._
 import easyfit.StopTestException
 import easyfit.Store
-import easyfit.IFilter
-
-trait FilterSetter
-{
-  protected def setFilter(name: String, value: String => String)
-}
+import easyfit.IConverter
 
 /**
- * Creates filters to be applied to expected values (SUT inputs)
+ * Creates converters to be applied to expected and actual values (SUT inputs and outputs)
  */
-class ExpectedFilter() extends FilterTable
-{
-  protected def setFilter(name: String, value: String => String)
-  {
-    Store.setExpectedFilter(name, value)
-  }
-}
-
-/**
- * Creates filters to be applied to actual values (SUT outputs)
- */
-class ActualFilter() extends FilterTable
-{
-  protected def setFilter(name: String, value: String => String)
-  {
-    Store.setActualFilter(name, value)
-  }
-}
-
-/**
- * Abstract base class for ExpectedFilter and ActualFilter.
- */
-abstract class FilterTable() extends FilterSetter
+class Converter()
 {
   def doTable(javaTable: java.util.List[java.util.List[String]]): java.util.List[java.util.List[String]] =
   {
@@ -60,9 +33,9 @@ abstract class FilterTable() extends FilterSetter
 
       validateFilterRowStructure(row)
 
-      val filter = createFilter(row.get(1))
+      val converter = createConverter(row.get(1))
 
-      setFilter(row.get(0), filter)
+      Store.setConverter(row.get(0), converter)
 
       val resRow = new java.util.ArrayList[String]
 
@@ -79,7 +52,7 @@ abstract class FilterTable() extends FilterSetter
   {
     if (table == null || table.size < 1)
     {
-      throw new StopTestException(FilterTableMissingRows)
+      throw new StopTestException(ConverterTableMissingRows)
     }
   }
 
@@ -87,28 +60,28 @@ abstract class FilterTable() extends FilterSetter
   {
     if (row.size != 2)
     {
-      throw new StopTestException(FilterTableInvalidColumns)
+      throw new StopTestException(ConverterTableInvalidColumns)
     }
   }
 
-  private def createFilter(filterDeclaration: String): String => String =
+  private def createConverter(declaration: String): IConverter =
   {
-    val rx = """(\w+\.)+\w+\.?""".r // e.g. com.example.filters.AddOne
+    val rx = """^(\w+\.)*\w+$""".r // e.g. com.example.converters.AddOne
 
-    if (rx.findFirstIn(filterDeclaration).nonEmpty)
+    if (rx.findFirstIn(declaration).nonEmpty)
     {
       try
       {
         {
-          val filterClass = Class.forName(filterDeclaration)
+          val converterClass = Class.forName(declaration)
 
-          filterClass.newInstance() match
+          converterClass.newInstance() match
           {
-            case filter: IFilter => (value: String) => filter.apply(value)
+            case converter: IConverter => converter
 
             case (other) => throw new StopTestException(
-              String.format(NotInstanceOfFilter,
-                other.getClass.getName, classOf[IFilter].getName))
+              String.format(NotInstanceOfConverter,
+                other.getClass.getName, classOf[IConverter].getName))
           }
         }
       }
@@ -116,12 +89,12 @@ abstract class FilterTable() extends FilterSetter
       {
         case stopEx: StopTestException => throw stopEx
 
-        case ex: Exception => throw new StopTestException(FailedCreatingFilter, ex)
+        case ex: Exception => throw new StopTestException(FailedCreatingConverter, ex)
       }
     }
     else
     {
-      throw new StopTestException(s"$InvalidFilterClass: '$filterDeclaration'")
+      throw new StopTestException(s"$InvalidConverterClass: '$declaration'")
     }
   }
 }

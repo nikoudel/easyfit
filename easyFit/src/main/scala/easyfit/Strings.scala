@@ -43,19 +43,17 @@ object Strings
 
   def UndefinedMap = "Undefined map"
 
-  def UndefinedFilter = "Undefined filter"
+  def UndefinedConverter = "Undefined converter"
 
-  def FilterTableMissingRows = "Filter table should have at least one row."
+  def ConverterTableMissingRows = "Converter table should have at least one row."
 
-  def FilterTableInvalidColumns = "Filter table should always have two columns."
+  def ConverterTableInvalidColumns = "Converter table should always have two columns."
 
-  def FailedCreatingFilter = "Failed creating a filter"
+  def FailedCreatingConverter = "Failed creating a converter"
 
-  def NotInstanceOfFilter = "Filter class %s does not implement interface %s."
+  def NotInstanceOfConverter = "Converter class %s does not implement interface %s."
 
-  def InvalidFilterClass = "Failed parsing filter class name (e.g. com.example.SomeFilter)"
-
-  def QueryInputFilter = "Query table can't have input filters"
+  def InvalidConverterClass = "Failed parsing converter class name (e.g. com.example.SomeConverter)"
 
   def ConnectionFailed = "Connection failed"
 

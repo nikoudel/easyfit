@@ -10,14 +10,16 @@
   *******************************************************************************/
 package easyfit.cells
 
+import easyfit.IConverter
+
 /**
  * Represents a cell in a Query table.
  * @param value initial cell value
- * @param actFilter "actual" filter on null
+ * @param converter IConverter on null
  */
 class QueryCell(
   value: String,
-  actFilter: String => String) extends TableCell(value, null, actFilter)
+  converter: IConverter) extends TableCell(value, converter)
 {
   /*
    Variable + A:

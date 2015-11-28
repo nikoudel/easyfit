@@ -12,7 +12,8 @@ package easyfit.cells
 
 import easyfit.{Store, StopTestException}
 import easyfit.Strings.InvalidColumnName
-import easyfit.Strings.UndefinedFilter
+import easyfit.Strings.UndefinedConverter
+import easyfit.IConverter
 
 /**
  * Represents a header cell in Row and Query tables.
@@ -21,9 +22,8 @@ import easyfit.Strings.UndefinedFilter
 class Header(value: String)
 {
   private var isMissing = false
-  private var filtersFetched = false
-  private var expFilter: String => String = null
-  private var actFilter: String => String = null
+  private var converterFetched = false
+  private var converter: IConverter = null
 
   def Value = value
   def IsMissing = isMissing
@@ -43,7 +43,7 @@ class Header(value: String)
     value.endsWith("?")
   }
 
-  def filterName(): String =
+  def converterName(): String =
   {
     val tokens = value.split(":")
 
@@ -89,28 +89,27 @@ class Header(value: String)
     "pass"
   }
 
-  def fetchFilters(): (String => String, String => String) =
+  def fetchConverter(): IConverter =
   {
-    if (filtersFetched)
+    if (converterFetched)
     {
-      return (expFilter, actFilter)
+      return converter
     }
 
-    val fName = filterName()
+    val fName = converterName()
 
     if (fName != "")
     {
-      expFilter = Store.getExpectedFilter(fName)
-      actFilter = Store.getActualFilter(fName)
+      converter = Store.getConverter(fName)
 
-      if (expFilter == null && actFilter == null)
+      if (converter == null)
       {
-        throw new StopTestException(UndefinedFilter + ": " + fName)
+        throw new StopTestException(UndefinedConverter + ": " + fName)
       }
     }
 
-    filtersFetched = true
+    converterFetched = true
 
-    (expFilter, actFilter)
+    converter
   }
 }

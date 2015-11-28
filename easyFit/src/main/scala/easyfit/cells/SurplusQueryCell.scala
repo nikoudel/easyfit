@@ -10,31 +10,26 @@
   *******************************************************************************/
 package easyfit.cells
 
+import easyfit.IConverter
+
 /**
  * Represents a cell in a surplus row in a Query table
  * @param sutResponse value coming from the SUT
- * @param actFilter "actual" filter or null
+ * @param converter IConverter or null
  */
 class SurplusQueryCell(
   sutResponse: String,
-  actFilter: String => String)
+  converter: IConverter)
 {
   def formatResult(): String =
   {
     var actual = sutResponse
 
-    if (actFilter != null)
+    if (converter != null)
     {
-      actual = actFilter.apply(actual)
+      actual = converter.convertActual(actual)
     }
 
     String.format("fail: %s (SURPLUS)", actual)
   }
-
-  /*
- O:
-   1. callSUT
-   2. outFilter.apply
-   4. mark as SURPLUS
- */
 }

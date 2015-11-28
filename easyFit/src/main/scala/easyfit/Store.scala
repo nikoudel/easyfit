@@ -17,12 +17,8 @@ import scala.collection.mutable
  */
 object Store
 {
-  private abstract class StoredFilter(val f: String => String)
-  private class ExpFilter(f: String => String) extends StoredFilter(f)
-  private class ActFilter(f: String => String) extends StoredFilter(f)
-
   private val Variables = new mutable.HashMap[String, String]
-  private val Filters = new mutable.HashMap[String, StoredFilter]
+  private val Converters = new mutable.HashMap[String, IConverter]
   private val Maps = new mutable.HashMap[String, Map[String, String]]
   private val Conf = new mutable.HashMap[String, String]
 
@@ -56,32 +52,14 @@ object Store
     setItem(key, value, Maps)
   }
 
-  def getActualFilter(key: String): String => String =
+  def getConverter(key: String): IConverter =
   {
-    getItem(key, Filters) match
-    {
-      case filter: ActFilter => filter.f
-      case _ => null
-    }
+    getItem(key, Converters)
   }
 
-  def setActualFilter(key: String, value: String => String)
+  def setConverter(key: String, value: IConverter)
   {
-    setItem(key, new ActFilter(value), Filters)
-  }
-
-  def getExpectedFilter(key: String): String => String =
-  {
-    getItem(key, Filters) match
-    {
-      case filter: ExpFilter => filter.f
-      case _ => null
-    }
-  }
-
-  def setExpectedFilter(key: String, value: String => String)
-  {
-    setItem(key, new ExpFilter(value), Filters)
+    setItem(key, value, Converters)
   }
 
   private def getItem[T >: Null](key: String, store: mutable.HashMap[String, T]): T =

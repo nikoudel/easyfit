@@ -1,16 +1,22 @@
 package filter;
 
-import easyfit.IFilter;
+import easyfit.IConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DateFormatter implements IFilter
+public class DateFormatter implements IConverter
 {
     @Override
-    public String apply(String s)
+    public String convertExpected(String s)
+    {
+        return s;
+    }
+    
+    @Override
+    public String convertActual(String s)
     {
         try
         {

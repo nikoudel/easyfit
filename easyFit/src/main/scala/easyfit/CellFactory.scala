@@ -11,7 +11,6 @@
 package easyfit
 
 import easyfit.Strings.InvalidColumnCount
-import easyfit.Strings.QueryInputFilter
 import easyfit.Strings.MissingColumns
 import easyfit.cells.{SurplusQueryCell, QueryCell, RowCell, Header}
 
@@ -52,14 +51,7 @@ object CellFactory
     {
       val header = h.next()
 
-      val (expFilter, actFilter) = header.fetchFilters()
-
-      if (expFilter != null)
-      {
-        throw new StopTestException(QueryInputFilter + ": " + header.filterName)
-      }
-
-      cellArray(i) = new SurplusQueryCell(c.next(), actFilter)
+      cellArray(i) = new SurplusQueryCell(c.next(),  header.fetchConverter())
     }
 
     cellArray
@@ -84,21 +76,12 @@ object CellFactory
 
   private def createRowCell(header: Header, cellValue: String): RowCell =
   {
-    val (expFilter, actFilter) = header.fetchFilters()
-
-    new RowCell(cellValue, expFilter, actFilter)
+    new RowCell(cellValue, header.fetchConverter())
   }
 
   private def createQueryCell(header: Header, cellValue: String): QueryCell =
   {
-    val (expFilter, actFilter) = header.fetchFilters()
-
-    if (expFilter != null)
-    {
-      throw new StopTestException(QueryInputFilter + ": " + header.filterName())
-    }
-
-    new QueryCell(cellValue, actFilter)
+    new QueryCell(cellValue, header.fetchConverter())
   }
 
   def createHeader(headerValues: java.util.List[String]): Seq[Header] =

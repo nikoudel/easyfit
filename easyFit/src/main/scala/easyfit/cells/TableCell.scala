@@ -10,19 +10,17 @@
   *******************************************************************************/
 package easyfit.cells
 
-import easyfit.{StopTestException, Store}
+import easyfit.{StopTestException, Store, IConverter}
 import easyfit.Strings.UndefinedVariable
 
 /**
  * Base class for Row and Query cells.
  * @param value initial cell value
- * @param expFilter "expected" filter, i.e. a function to be applied to expected values (SUT inputs)
- * @param actFilter "actual" filter, i.e. a function to be applied to actual values (SUT outputs)
+ * @param converter instance of IConverter
  */
 abstract class TableCell(
   value: String,
-  expFilter: String => String,
-  actFilter: String => String)
+  converter: IConverter)
 {
   var variable: String = null
   var expected: String = null
@@ -57,9 +55,9 @@ abstract class TableCell(
       expected = varValue
     }
 
-    if (expFilter != null)
+    if (converter != null)
     {
-      expected = expFilter.apply(expected)
+      expected = converter.convertExpected(expected)
     }
   }
 
@@ -67,9 +65,9 @@ abstract class TableCell(
   {
     var actual = sutResponse
 
-    if (actFilter != null)
+    if (converter != null)
     {
-      actual = actFilter.apply(actual)
+      actual = converter.convertActual(actual)
     }
 
     val failAction = if (ignoreResult) "ignore" else "fail"

@@ -10,12 +10,13 @@
   *******************************************************************************/
 package easyfit.cells
 
+import easyfit.IConverter
+
 class RowCell(
   value: String,
-  expFilter: String => String,
-  actFilter: String => String) extends TableCell(value, expFilter, actFilter)
+  converter: IConverter) extends TableCell(value, converter)
 {
-  def this(value: String) = this(value, null, null)
+  def this(value: String) = this(value, null)
 
   def getSutInput(emptySutInput: Boolean): String =
   {

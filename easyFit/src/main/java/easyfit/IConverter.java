@@ -11,9 +11,10 @@
 package easyfit;
 
 /**
- * The interface to be implemented by filter classes.
+ * The interface to be implemented by converter classes.
  */
-public interface IFilter
+public interface IConverter
 {
-    public String apply(String value);
+    public String convertExpected(String value);
+    public String convertActual(String value);
 }
