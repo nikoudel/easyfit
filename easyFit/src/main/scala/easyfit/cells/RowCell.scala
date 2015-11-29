@@ -14,7 +14,7 @@ import easyfit.IConverter
 
 class RowCell(
   value: String,
-  converter: IConverter) extends TableCell(value, converter)
+  header: Header) extends TableCell(value, header)
 {
   def this(value: String) = this(value, null)
 

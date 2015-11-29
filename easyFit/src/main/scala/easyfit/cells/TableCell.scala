@@ -16,12 +16,15 @@ import easyfit.Strings.UndefinedVariable
 /**
  * Base class for Row and Query cells.
  * @param value initial cell value
- * @param converter instance of IConverter
+ * @param header cell header
  */
 abstract class TableCell(
   value: String,
-  converter: IConverter)
+  header: Header)
 {
+  val converter = if (header == null) null else header.fetchConverter()
+  val isEmptySutInput = if (header == null) false else header.isEmptySutInput
+
   var variable: String = null
   var expected: String = null
 
@@ -55,7 +58,7 @@ abstract class TableCell(
       expected = varValue
     }
 
-    if (converter != null)
+    if (converter != null && !isEmptySutInput)
     {
       expected = converter.convertExpected(expected)
     }

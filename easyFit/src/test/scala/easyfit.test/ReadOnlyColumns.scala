@@ -10,6 +10,7 @@
   *******************************************************************************/
 package easyfit.test
 
+import easyfit._
 import easyfit.cells.{RowCell, Header}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
@@ -22,6 +23,15 @@ class ReadOnlyColumns extends EasyTest
       val (in, out, expected) = getTestData()
 
       runRowTest(in, out.iterator, expected, ensureFirstColumnIsEmpty)
+    }
+
+  it should "not apply converters to read-only columns" in
+    {
+      Store.setConverter("ac", new AdderConverter(" + 1", " + 2"))
+
+      val (in, out, expected) = getTestDataWithConverter()
+
+      runRowTest(in, out.iterator, expected, ensureConverterColumnIsEmpty)
     }
 
   private def getTestData(): (Seq[Seq[String]], Seq[Seq[String]], Seq[Seq[String]]) =
@@ -49,5 +59,30 @@ class ReadOnlyColumns extends EasyTest
 
     header(1).Value should be("C2")
     row(1).getSutInput(false).length should be (4)
+  }
+
+  private def getTestDataWithConverter(): (Seq[Seq[String]], Seq[Seq[String]], Seq[Seq[String]]) =
+  {
+    val header = Seq("ac:C1?", "ac:C2?")
+
+    val (in1, out1) = (Seq("$v1=", "r1c2"), Seq("r1c1", "r1c2"))
+
+    val exp1 = Seq("pass", "pass")
+    val exp2 = Seq("pass: $v1 <- [r1c1 + 2]", "fail: [r1c2] != [r1c2 + 2]")
+
+    return (
+      Seq(header, in1),
+      Seq(out1),
+      Seq(exp1, exp2)
+      )
+  }
+
+  private def ensureConverterColumnIsEmpty(header: Seq[Header], row: Seq[RowCell])
+  {
+    header(0).Value should be("ac:C1?")
+    header(1).Value should be("ac:C2?")
+
+    row(0).getSutInput(true) should be(null)
+    row(1).getSutInput(true) should be(null)
   }
 }

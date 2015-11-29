@@ -15,11 +15,11 @@ import easyfit.IConverter
 /**
  * Represents a cell in a Query table.
  * @param value initial cell value
- * @param converter IConverter on null
+ * @param header cell header
  */
 class QueryCell(
   value: String,
-  converter: IConverter) extends TableCell(value, converter)
+  header: Header) extends TableCell(value, header)
 {
   /*
    Variable + A:

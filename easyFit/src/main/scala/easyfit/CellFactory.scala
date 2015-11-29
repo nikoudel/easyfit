@@ -88,12 +88,12 @@ object CellFactory
 
   private def createRowCell(header: Header, cellValue: String): RowCell =
   {
-    new RowCell(cellValue, header.fetchConverter())
+    new RowCell(cellValue, header)
   }
 
   private def createQueryCell(header: Header, cellValue: String): QueryCell =
   {
-    new QueryCell(cellValue, header.fetchConverter())
+    new QueryCell(cellValue, header)
   }
 
   def createHeader(headerValues: java.util.List[String]): Seq[Header] =
