@@ -15,8 +15,10 @@ import easyfit.Strings.MapTableMissingRows
 import easyfit.Strings.MapTableInvalidColumns
 import easyfit.Strings.MapTableEmptyKey
 import easyfit.Strings.UndefinedVariable
+import easyfit.Strings.UndefinedConverter
 import easyfit.StopTestException
 import easyfit.Store
+import easyfit.CellFactory
 
 import scala.collection.immutable
 
@@ -83,8 +85,10 @@ class Map(mapId: String)
     map
   }
 
-  private def getPair(key: String, value: String, result: java.util.List[java.util.List[String]]): (String, String) =
+  private def getPair(header: String, value: String, result: java.util.List[java.util.List[String]]): (String, String) =
   {
+    val (converterName, key) = CellFactory.splitConverterHeader(header)
+
     if (key == null || key == "")
     {
       throw new StopTestException(MapTableEmptyKey)
@@ -102,20 +106,46 @@ class Map(mapId: String)
       }
       else
       {
+        val converted = applyConverter(converterName, varValue, true)
+
         row.add("pass")
-        row.add(s"pass: $value [$varValue]")
+        row.add(s"pass: $value [$converted]")
 
         result.add(row)
 
-        return key -> varValue
+        return key -> applyConverter(converterName, varValue, false)
       }
     }
 
+    val converted = applyConverter(converterName, value, true)
+
     row.add("pass")
-    row.add("pass")
+    row.add(s"pass: $converted")
 
     result.add(row)
 
-    key -> value
+    key -> applyConverter(converterName, value, false)
+  }
+
+  private def applyConverter(converterName: String, value: String, bothConversions: Boolean): String =
+  {
+    if (converterName == null)
+    {
+      return value
+    }
+
+    var converter = Store.getConverter(converterName)
+
+    if (converter == null)
+    {
+      throw new StopTestException(UndefinedConverter + ": " + converterName)
+    }
+
+    if(bothConversions)
+    {
+      return converter.convertActual(converter.convertExpected(value))
+    }
+
+    converter.convertExpected(value)
   }
 }

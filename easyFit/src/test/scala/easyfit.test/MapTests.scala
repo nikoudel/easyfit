@@ -72,7 +72,7 @@ class MapTests extends EasyTest
       map("key1") should be("value")
       map("key2") should be("123")
 
-      results.get(0).get(1) should be("pass")
+      results.get(0).get(1) should be("pass: value")
       results.get(1).get(1) should be("pass: $value [123]")
     }
 }

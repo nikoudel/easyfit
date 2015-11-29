@@ -74,6 +74,18 @@ object CellFactory
     cellArray
   }
 
+  def splitConverterHeader(header: String): (String, String) =
+  {
+    val tokens = header.split(":")
+
+    if (tokens.length == 2)
+    {
+      return (tokens(0), tokens(1))
+    }
+
+    (null, header)
+  }
+
   private def createRowCell(header: Header, cellValue: String): RowCell =
   {
     new RowCell(cellValue, header.fetchConverter())

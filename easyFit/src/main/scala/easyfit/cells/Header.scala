@@ -14,6 +14,7 @@ import easyfit.{Store, StopTestException}
 import easyfit.Strings.InvalidColumnName
 import easyfit.Strings.UndefinedConverter
 import easyfit.IConverter
+import easyfit.CellFactory
 
 /**
  * Represents a header cell in Row and Query tables.
@@ -41,18 +42,6 @@ class Header(value: String)
   def isEmptySutInput: Boolean =
   {
     value.endsWith("?")
-  }
-
-  def converterName(): String =
-  {
-    val tokens = value.split(":")
-
-    if (tokens.length == 2)
-    {
-      return tokens(0)
-    }
-
-    ""
   }
 
   def sutInput(): String =
@@ -96,15 +85,15 @@ class Header(value: String)
       return converter
     }
 
-    val fName = converterName()
+    val (converterName, _) = CellFactory.splitConverterHeader(value)
 
-    if (fName != "")
+    if (converterName != null)
     {
-      converter = Store.getConverter(fName)
+      converter = Store.getConverter(converterName)
 
       if (converter == null)
       {
-        throw new StopTestException(UndefinedConverter + ": " + fName)
+        throw new StopTestException(UndefinedConverter + ": " + converterName)
       }
     }
 

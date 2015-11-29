@@ -12,28 +12,30 @@ package easyfit.test
 
 import easyfit._
 import easyfit.tables.Converter
+import easyfit.tables.Map
 import easyfit.Strings._
 import easyfit.cells.{RowCell, Header}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
+import scala.collection.JavaConversions.seqAsJavaList
 
 @RunWith(classOf[JUnitRunner])
 class ConverterTests extends EasyTest
 {
   "A Converter table" should "add converter objects" in
     {
-      val converterTable = new Converter()
-      val className = converterTable.getClass.getName
+      val adderConverterName = "ac"
+      val adderConverterClassName = classOf[easyfit.test.AdderConverter].getName
 
-      val in = Seq(Seq(className, "easyfit.test.AdderConverter"))
+      val in = Seq(Seq(adderConverterName, adderConverterClassName))
 
-      val tableResult = converterTable.doTable(asJavaArrayList(in))
+      val tableResult = new Converter().doTable(asJavaArrayList(in))
 
       val expectedResult = Seq(Seq("pass", "pass"))
 
       compareTables(tableResult, asJavaArrayList(expectedResult))
 
-      val converter = Store.getConverter(className)
+      val converter = Store.getConverter(adderConverterName)
 
       converter should not be null
 
@@ -157,6 +159,28 @@ class ConverterTests extends EasyTest
       val f = () => runQueryTest(in, out, expected)
 
       failMessage(f) should be(UndefinedConverter + ": " + "u-converter")
+    }
+
+  "A Map table" should "apply converters correctly" in
+    {
+      Store.setConverter("ac", new AdderConverter(" + 1", " + 2"))
+
+      val row1 = seqAsJavaList(Seq("ac:key1", "value"))
+      val row2 = seqAsJavaList(Seq("ac:key2", "$value"))
+      val table = seqAsJavaList(Seq(row1, row2))
+
+      Store.setVariable("$value", "123")
+
+      val results = new Map("test_map").doTable(table)
+
+      val map = Store.getMap("test_map")
+
+      map should not be null
+      map("key1") should be("value + 1")
+      map("key2") should be("123 + 1")
+
+      results.get(0).get(1) should be("pass: value + 1 + 2")
+      results.get(1).get(1) should be("pass: $value [123 + 1 + 2]")
     }
 
   private def getTestData(converterName: String, strToExpected: String, strToActual: String): (Seq[Seq[String]], Seq[Seq[String]], Seq[Seq[String]]) =

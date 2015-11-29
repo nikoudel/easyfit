@@ -10,7 +10,7 @@
 |baseURL    |http://localhost:48080/(controller).json|
 |logFilePath|.\easyFit.log                           |
 
-!|Table:ActualFilter    |
+!|Table:Converter       |
 |df|filter.DateFormatter|
 
 !|Table:Row|CreateCar                                              |
