@@ -75,4 +75,24 @@ class MapTests extends EasyTest
       results.get(0).get(1) should be("pass: value")
       results.get(1).get(1) should be("pass: $value [123]")
     }
+
+  it should "replace existing map" in
+    {
+      val r1a = seqAsJavaList(Seq("key1", "value1a"))
+      val r2a = seqAsJavaList(Seq("key2", "value2a"))
+      val table_a = seqAsJavaList(Seq(r1a, r2a))
+
+      new Map("test_map").doTable(table_a)
+
+      val r1b = seqAsJavaList(Seq("key1", "value1b"))
+      val table_b = seqAsJavaList(Seq(r1b))
+
+      new Map("test_map").doTable(table_b)
+
+      val map = Store.getMap("test_map")
+
+      map should not be null
+      map("key1") should be("value1b")
+      map contains "key2" should be(false)
+    }
 }

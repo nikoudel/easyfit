@@ -33,7 +33,7 @@ class Map(mapId: String)
     validateMapTableStructure(javaTable)
 
     val result = new java.util.ArrayList[java.util.List[String]]()
-    var map = createOrGetMap()
+    var map = createMap()
     val it = javaTable.iterator
 
     while (it.hasNext)
@@ -71,16 +71,11 @@ class Map(mapId: String)
     }
   }
 
-  private def createOrGetMap(): immutable.Map[String, String] =
+  private def createMap(): immutable.Map[String, String] =
   {
-    var map = Store.getMap(mapId)
+    val map = immutable.Map.empty[String, String]
 
-    if (map == null)
-    {
-      map = immutable.Map.empty[String, String]
-
-      Store.setMap(mapId, map)
-    }
+    Store.setMap(mapId, map)
 
     map
   }
